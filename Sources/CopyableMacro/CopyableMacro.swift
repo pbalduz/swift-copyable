@@ -26,7 +26,7 @@ public struct StringifyMacro: ExpressionMacro {
 }
 
 @main
-struct swift_copyablePlugin: CompilerPlugin {
+struct CopyablePlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         StringifyMacro.self,
     ]
