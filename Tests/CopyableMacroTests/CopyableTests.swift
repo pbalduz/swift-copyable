@@ -34,7 +34,7 @@ final class swift_copyableTests: XCTestCase {
         )
     }
 
-    func testCopyableWithPropertiesOnTheSameLine() throws {
+    func testCopyable_differentTypeInlinedProperties() throws {
         assertMacroExpansion(
             """
             @Copyable
@@ -48,6 +48,27 @@ final class swift_copyableTests: XCTestCase {
 
                 func copy(name: String? = nil, number: Int? = nil) -> Player {
                     Player(name: name ?? self.name, number: number ?? self.number)
+                }
+            }
+            """,
+            macros: testMacros
+        )
+    }
+
+    func testCopyable_sameTypeInlinedProperties() throws {
+        assertMacroExpansion(
+            """
+            @Copyable
+            struct Player {
+                let firstName, lastName: String
+            }
+            """,
+            expandedSource: """
+            struct Player {
+                let firstName, lastName: String
+
+                func copy(firstName: String? = nil, lastName: Int? = nil) -> Player {
+                    Player(firstName: firstName ?? self.firstName, lastName: lastName ?? self.lastName)
                 }
             }
             """,
