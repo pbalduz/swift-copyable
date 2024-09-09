@@ -1,48 +1,59 @@
-import SwiftSyntax
-import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
 import XCTest
 
-// Macro implementations build for the host, so the corresponding module is not available when cross-compiling. Cross-compiled tests may still make use of the macro itself in end-to-end tests.
-#if canImport(swift_copyableMacros)
-import swift_copyableMacros
+#if canImport(CopyableMacro)
+
+import CopyableMacro
 
 let testMacros: [String: Macro.Type] = [
-    "stringify": StringifyMacro.self,
+    "Copyable": CopyableMacro.self,
 ]
-#endif
 
 final class swift_copyableTests: XCTestCase {
-    func testMacro() throws {
-        #if canImport(swift_copyableMacros)
+    func testCopyable() throws {
         assertMacroExpansion(
             """
-            #stringify(a + b)
+            @Copyable
+            struct Player {
+                let name: String
+                let number: Int
+            }
             """,
             expandedSource: """
-            (a + b, "a + b")
+            struct Player {
+                let name: String
+                let number: Int
+
+                func copy(name: String? = nil, number: Int? = nil) -> Player {
+                    Player(name: name ?? self.name, number: number ?? self.number)
+                }
+            }
             """,
             macros: testMacros
         )
-        #else
-        throw XCTSkip("macros are only supported when running tests for the host platform")
-        #endif
     }
 
-    func testMacroWithStringLiteral() throws {
-        #if canImport(swift_copyableMacros)
+    func testCopyableWithPropertiesOnTheSameLine() throws {
         assertMacroExpansion(
-            #"""
-            #stringify("Hello, \(name)")
-            """#,
-            expandedSource: #"""
-            ("Hello, \(name)", #""Hello, \(name)""#)
-            """#,
+            """
+            @Copyable
+            struct Player {
+                let name: String, number: Int
+            }
+            """,
+            expandedSource: """
+            struct Player {
+                let name: String, number: Int
+
+                func copy(name: String? = nil, number: Int? = nil) -> Player {
+                    Player(name: name ?? self.name, number: number ?? self.number)
+                }
+            }
+            """,
             macros: testMacros
         )
-        #else
-        throw XCTSkip("macros are only supported when running tests for the host platform")
-        #endif
     }
 }
+
+#endif
