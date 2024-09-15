@@ -32,7 +32,8 @@ extension LabeledExprSyntax {
                     base: DeclReferenceExprSyntax(baseName: .keyword(.`self`)),
                     name: property.name
                 )
-            )
+            ),
+            trailingComma: .commaToken()
         )
     }
 }

@@ -15,18 +15,18 @@ final class swift_copyableTests: XCTestCase {
         assertMacroExpansion(
             """
             @Copyable
-            struct Player {
-                let name: String
-                let number: Int
+            struct Struct {
+                let a: String
+                let b: Int
             }
             """,
             expandedSource: """
-            struct Player {
-                let name: String
-                let number: Int
+            struct Struct {
+                let a: String
+                let b: Int
 
-                func copy(name: String? = nil, number: Int? = nil) -> Player {
-                    Player(name: name ?? self.name, number: number ?? self.number)
+                func copy(a: String? = nil, b: Int? = nil) -> Struct {
+                    Struct(a: a ?? self.a, b: b ?? self.b)
                 }
             }
             """,
@@ -38,16 +38,16 @@ final class swift_copyableTests: XCTestCase {
         assertMacroExpansion(
             """
             @Copyable
-            struct Player {
-                let name: String, number: Int
+            struct Struct {
+                let a: String, b: Int
             }
             """,
             expandedSource: """
-            struct Player {
-                let name: String, number: Int
+            struct Struct {
+                let a: String, b: Int
 
-                func copy(name: String? = nil, number: Int? = nil) -> Player {
-                    Player(name: name ?? self.name, number: number ?? self.number)
+                func copy(a: String? = nil, b: Int? = nil) -> Struct {
+                    Struct(a: a ?? self.a, b: b ?? self.b)
                 }
             }
             """,
@@ -59,16 +59,37 @@ final class swift_copyableTests: XCTestCase {
         assertMacroExpansion(
             """
             @Copyable
-            struct Player {
-                let firstName, lastName: String
+            struct Struct {
+                let a, b: String
             }
             """,
             expandedSource: """
-            struct Player {
-                let firstName, lastName: String
+            struct Struct {
+                let a, b: String
 
-                func copy(firstName: String? = nil, lastName: Int? = nil) -> Player {
-                    Player(firstName: firstName ?? self.firstName, lastName: lastName ?? self.lastName)
+                func copy(a: String? = nil, b: String? = nil) -> Struct {
+                    Struct(a: a ?? self.a, b: b ?? self.b)
+                }
+            }
+            """,
+            macros: testMacros
+        )
+    }
+
+    func testCopyable_inlinedPropertiesMix() throws {
+        assertMacroExpansion(
+            """
+            @Copyable
+            struct Struct {
+                let a, b: String, c, d: Int
+            }
+            """,
+            expandedSource: """
+            struct Struct {
+                let a, b: String, c, d: Int
+
+                func copy(a: String? = nil, b: String? = nil, c: Int? = nil, d: Int? = nil) -> Struct {
+                    Struct(a: a ?? self.a, b: b ?? self.b, c: c ?? self.c, d: d ?? self.d)
                 }
             }
             """,
