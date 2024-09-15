@@ -8,4 +8,12 @@ extension PatternBindingSyntax {
     var type: TypeSyntax? {
         typeAnnotation?.type
     }
+
+    var containsType: Bool {
+        typeAnnotation != nil
+    }
+
+    var containsTrailingComma: Bool {
+        trailingComma != nil
+    }
 }

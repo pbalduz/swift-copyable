@@ -2,15 +2,11 @@ import SwiftSyntax
 
 struct FunctionSignatureFactory: Factory {
     static func build(with specifications: Specifications) throws -> FunctionSignatureSyntax {
-        let parameters = try specifications.properties.map {
-            guard let parameter = $0.functionParameterSyntax else {
-                throw MacroError()
-            }
-            return parameter
-        }
-        return FunctionSignatureSyntax(
+        FunctionSignatureSyntax(
             parameterClause: FunctionParameterClauseSyntax(
-                parameters: FunctionParameterListSyntax(parameters).trimmingLastTrailingComma
+                parameters: FunctionParameterListSyntax(
+                    specifications.properties.map(FunctionParameterSyntax.init(property:))
+                ).trimmingLastTrailingComma
             ),
             returnClause: ReturnClauseSyntax(
                 type: IdentifierTypeSyntax(name: specifications.name)
@@ -19,12 +15,11 @@ struct FunctionSignatureFactory: Factory {
     }
 }
 
-extension PatternBindingSyntax {
-    fileprivate var functionParameterSyntax: FunctionParameterSyntax? {
-        guard let patternIdentifier, let type else { return nil }
-        return FunctionParameterSyntax(
-            firstName: patternIdentifier,
-            type: OptionalTypeSyntax(wrappedType: type),
+extension FunctionParameterSyntax {
+    fileprivate init(property: Specifications.Property) {
+        self.init(
+            firstName: property.name,
+            type: OptionalTypeSyntax(wrappedType: property.type),
             defaultValue: InitializerClauseSyntax(value: NilLiteralExprSyntax()),
             trailingComma: .commaToken()
         )

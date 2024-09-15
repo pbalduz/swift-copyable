@@ -20,6 +20,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.0"),
+        .package(url: "https://github.com/apple/swift-algorithms", from: "1.2.0")
     ],
     targets: [
         .macro(
@@ -32,6 +33,10 @@ let package = Package(
                 .product(
                     name: "SwiftCompilerPlugin",
                     package: "swift-syntax"
+                ),
+                .product(
+                    name: "Algorithms",
+                    package: "swift-algorithms"
                 )
             ]
         ),

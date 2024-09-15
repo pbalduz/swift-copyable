@@ -1,13 +1,19 @@
+import Algorithms
 import SwiftSyntax
-import SwiftParser
 
 struct Parser {
-    func extract(from declaration: DeclGroupSyntax) throws -> Specifications {
-        guard let structDecl = declaration.asStructDecl else {
+    func parse(_ declaration: SyntaxProtocol) throws -> Specifications {
+        guard let structDecl = declaration.as(StructDeclSyntax.self) else {
             throw MacroError()
         }
 
-        let properties = declaration.propertiesDecl
+        let properties = structDecl
+            .memberBlock
+            .members
+            .compactMap(\.variables)
+            .flatMap(\.chunksByType)
+            .flatMap(Specifications.Property.parsed(from:))
+
         guard !properties.isEmpty else {
             throw MacroError()
         }
@@ -19,25 +25,27 @@ struct Parser {
     }
 }
 
-struct Specifications {
-    let name: TokenSyntax
-    let properties: PatternBindingListSyntax
+extension PatternBindingListSyntax {
+    fileprivate var chunksByType: [Slice<PatternBindingListSyntax>] {
+        chunked {
+            let left = !$0.containsType && $0.containsTrailingComma
+            let right = left || $1.containsType
+            return left && right
+        }
+    }
 }
 
-extension DeclGroupSyntax {
-    var asStructDecl: StructDeclSyntax? {
-        self.as(StructDeclSyntax.self)
-    }
-
-    var propertiesDecl: PatternBindingListSyntax {
-        self.memberBlock
-            .members
-            .reduce(PatternBindingListSyntax()) { accumulated, member in
-                var nextResult = accumulated
-                if let bindings = member.decl.as(VariableDeclSyntax.self)?.bindings {
-                    nextResult.append(contentsOf: bindings)
-                }
-                return nextResult
-            }
+extension Specifications.Property {
+    fileprivate static func parsed(from slice: Slice<PatternBindingListSyntax>) -> [Self] {
+        guard let type = slice.last?.typeAnnotation?.type else {
+            return []
+        }
+        return slice.compactMap { binding in
+            guard let name = binding.patternIdentifier else { return nil }
+            return Specifications.Property(
+                name: name,
+                type: type
+            )
+        }
     }
 }
