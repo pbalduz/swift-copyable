@@ -19,7 +19,7 @@ extension FunctionParameterSyntax {
     fileprivate init(property: Specifications.Property) {
         self.init(
             firstName: property.name,
-            type: OptionalTypeSyntax(wrappedType: property.type),
+            type: OptionalTypeSyntax(wrappedType: property.type.trimmed),
             defaultValue: InitializerClauseSyntax(value: NilLiteralExprSyntax()),
             trailingComma: .commaToken()
         )

@@ -18,15 +18,19 @@ final class swift_copyableTests: XCTestCase {
             struct Struct {
                 let a: String
                 let b: Int
+                var c: Int
+                var d: Int = 24
             }
             """,
             expandedSource: """
             struct Struct {
                 let a: String
                 let b: Int
+                var c: Int
+                var d: Int = 24
 
-                func copy(a: String? = nil, b: Int? = nil) -> Struct {
-                    Struct(a: a ?? self.a, b: b ?? self.b)
+                func copy(a: String? = nil, b: Int? = nil, c: Int? = nil, d: Int? = nil) -> Struct {
+                    Struct(a: a ?? self.a, b: b ?? self.b, c: c ?? self.c, d: d ?? self.d)
                 }
             }
             """,

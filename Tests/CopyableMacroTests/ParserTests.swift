@@ -3,6 +3,29 @@ import XCTest
 @testable import CopyableMacro
 
 final class ParserTests: XCTestCase {
+    func testParser_simpleLetAndVar() throws {
+        let declaration = DeclSyntax(
+            """
+            struct Struct {
+                var a: Int
+                let b: Int
+            }
+            """
+        )
+        let parser = Parser()
+
+        try parser.assert(
+            declaration: declaration,
+            equals: Specifications(
+                name: .identifier("Struct"),
+                properties: [
+                    .init(name: "a", type: "Int"),
+                    .init(name: "b", type: "Int"),
+                ]
+            )
+        )
+    }
+    
     func testParser_multilineProperties() throws {
         let declaration = DeclSyntax(
             """
@@ -88,6 +111,27 @@ final class ParserTests: XCTestCase {
                     .init(name: "a", type: "String"),
                     .init(name: "b", type: "String"),
                     .init(name: "c", type: "Int")
+                ]
+            )
+        )
+    }
+
+    func testParser_initialisedVar() throws {
+        let declaration = DeclSyntax(
+            """
+            struct Struct {
+                var a: Int = 24
+            }
+            """
+        )
+        let parser = Parser()
+
+        try parser.assert(
+            declaration: declaration,
+            equals: Specifications(
+                name: .identifier("Struct"),
+                properties: [
+                    .init(name: "a", type: "Int"),
                 ]
             )
         )
