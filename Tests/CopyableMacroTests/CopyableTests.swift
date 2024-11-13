@@ -100,6 +100,41 @@ final class swift_copyableTests: XCTestCase {
             macros: testMacros
         )
     }
+
+    func testCopyable_didSetAndWillSet() throws {
+        assertMacroExpansion(
+            """
+            @Copyable
+            struct Struct {
+                var a: Int {
+                    didSet {
+                        print("didSet")
+                    }
+                    willSet {
+                        print("willSet")
+                    }
+                }
+            }
+            """,
+            expandedSource: """
+            struct Struct {
+                var a: Int {
+                    didSet {
+                        print("didSet")
+                    }
+                    willSet {
+                        print("willSet")
+                    }
+                }
+
+                func copy(a: Int? = nil) -> Struct {
+                    Struct(a: a ?? self.a)
+                }
+            }
+            """,
+            macros: testMacros
+        )
+    }
 }
 
 #endif

@@ -136,6 +136,32 @@ final class ParserTests: XCTestCase {
             )
         )
     }
+
+    func testParser_withDidSetAndWillSet() throws {
+        let declaration = DeclSyntax(
+            """
+            struct Struct {
+                var a: Int {
+                    didSet {
+                        print("didSet")
+                    }
+                    willSet {
+                        print("willSet")
+                    }
+                }
+            }
+            """
+        )
+        let parser = Parser()
+
+        try parser.assert(
+            declaration: declaration,
+            equals: Specifications(
+                name: .identifier("Struct"),
+                properties: [.init(name: "a", type: "Int")]
+            )
+        )
+    }
 }
 
 extension Parser {
