@@ -11,6 +11,7 @@ struct Parser {
             .memberBlock
             .members
             .compactMap(\.variables)
+            .compactMap { $0.filter({ syntax in syntax.isValid }) }
             .flatMap(\.chunksByType)
             .flatMap(Specifications.Property.parsed(from:))
 
@@ -46,6 +47,25 @@ extension Specifications.Property {
                 name: name,
                 type: type
             )
+        }
+    }
+}
+
+extension PatternBindingSyntax {
+    fileprivate var isValid: Bool {
+        guard let accessorBlock else { return true }
+        guard let accessors = accessorBlock.accessors.as(AccessorDeclListSyntax.self) else {
+            return false
+        }
+        return accessors.reduce(true) { $0 && $1.hasValidAccessorSpecifier() }
+    }
+}
+
+extension AccessorDeclSyntax {
+    fileprivate func hasValidAccessorSpecifier() -> Bool {
+        switch accessorSpecifier.tokenKind {
+        case .keyword(.didSet), .keyword(.willSet): true
+        default: false
         }
     }
 }

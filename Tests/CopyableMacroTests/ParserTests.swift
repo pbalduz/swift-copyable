@@ -162,6 +162,49 @@ final class ParserTests: XCTestCase {
             )
         )
     }
+
+    func testParser_initialisedLetFiltered() throws {
+        let declaration = DeclSyntax(
+            """
+            struct Struct {
+                let a = 24
+                let b: Int
+            }
+            """
+        )
+        let parser = Parser()
+
+        try parser.assert(
+            declaration: declaration,
+            equals: Specifications(
+                name: .identifier("Struct"),
+                properties: [.init(name: "b", type: "Int")]
+            )
+        )
+    }
+
+    func testParser_computedPropertyFiltered() throws {
+        let declaration = DeclSyntax(
+            """
+            struct Struct {
+                var a: Int {
+                    24
+                }
+                var b: Int { 8 }
+                let c: Int
+            }
+            """
+        )
+        let parser = Parser()
+
+        try parser.assert(
+            declaration: declaration,
+            equals: Specifications(
+                name: .identifier("Struct"),
+                properties: [.init(name: "c", type: "Int")]
+            )
+        )
+    }
 }
 
 extension Parser {

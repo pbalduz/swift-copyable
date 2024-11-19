@@ -101,6 +101,35 @@ final class swift_copyableTests: XCTestCase {
         )
     }
 
+    func testCopyable_computedProperties() throws {
+        assertMacroExpansion(
+            """
+            @Copyable
+            struct Struct {
+                var a: Int {
+                    24
+                }
+                var b: String { "b" }
+                let c: Int
+            }
+            """,
+            expandedSource: """
+            struct Struct {
+                var a: Int {
+                    24
+                }
+                var b: String { "b" }
+                let c: Int
+
+                func copy(c: Int? = nil) -> Struct {
+                    Struct(c: c ?? self.c)
+                }
+            }
+            """,
+            macros: testMacros
+        )
+    }
+
     func testCopyable_didSetAndWillSet() throws {
         assertMacroExpansion(
             """
